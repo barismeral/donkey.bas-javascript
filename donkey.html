@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Donkey.js</title>
+
+    <style>
+        .container {
+
+            width: 640px;
+            height: 466px;
+            background-color: #515151;
+            position: relative;
+            box-shadow: 0 20px 20px gray !important;
+            overflow: hidden;
+            border: 3px solid white;
+
+        }
+
+        .left-side {
+
+            width: 170px;
+            height: 440px;
+            background: #02FAFC;
+            position: absolute;
+            left: 10px;
+            top: 10px;
+
+        }
+
+
+
+        .right-side {
+
+            width: 200px;
+            height: 440px;
+            background: #02FAFC;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+
+        }
+
+        .right-side,
+        .left-side {
+
+            border: 3px solid white;
+            text-align: center;
+
+
+        }
+
+        .center {
+
+            position: absolute;
+            width: 200px;
+            height: 440px;
+            top: 14px;
+            left: 202px;
+            border-left: 3px solid white;
+            border-right: 3px solid white;
+
+
+        }
+
+        h2 {
+            height: 30px;
+            padding: 2px;
+            width: 95px;
+            left: 30px;
+        }
+
+        h2,
+        .score {
+
+            position: absolute;
+            font-family: 'Consolas';
+            font-weight: bold;
+            background-color: #515151;
+            color: white;
+        }
+
+
+
+        .score {
+
+
+            width: 65px;
+            height: 20px;
+            padding: 2px;
+            top: 40px;
+            left: 40px;
+
+        }
+
+
+
+        p {
+
+            font-family: 'Consolas';
+            font-weight: bold;
+            background-color: #515151;
+            color: white;
+            position: absolute;
+            left: 10px;
+            font-size: 18px;
+            padding-left: 10px;
+			padding-right: 10px;
+			padding-top:5px;
+			padding-bottom:5px;
+            letter-spacing: 3px;
+
+        }
+
+        img {
+            position: absolute;
+            transition: color 1s;
+
+        }
+    </style>
+
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="left-side">
+
+            <h2>Donkey:</h2>
+            <h3 class="score" id="donkeyScore">0</h3>
+
+        </div>
+        <div class="center">
+
+            <img src="img/car.png" width="60" id="car" style="left: 10px;top:310px">
+            <img src="img/donkey.png" id="donkey" style="left: 10px;top:400px;">
+            <img src="img/line.png" class="line" style="left: 100px;top:-460px;">
+            <img src="img/line.png" class="line" style="left: 100px;top:-3px;">
+
+
+
+        </div>
+        <div class="right-side">
+            <h2>Driver:</h2>
+            <h3 class="score" id="driverScore">0</h3>
+
+            <p style="bottom: 118px;">Press Space</p>
+            <p style="bottom: 93px;">Bar to switch</p>
+            <p style="bottom: 70px;">lanes</p>
+            <p style="bottom: 35px;">Press ESC</p>
+            <p style="bottom: 10px;">to exit</p>
+
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+
+        var donkey;
+        var car;
+        var lines = [];
+
+        const CAR_LEFT = '10px';
+        const CAR_RIGTH = "117px";
+
+        const DONKEY_LEFT = '10px';
+        const DONKEY_RIGTH = "117px";
+
+        var donkeyX = -50;
+        var carY = 310;
+        var donkeyTop;
+        var carTop;
+        var donkeyBottom;
+        var lineX = 0;
+
+
+
+        window.onload = () => {
+
+            donkey = document.querySelector('#donkey');
+            car = document.querySelector('#car');
+            driverScore = document.querySelector("#driverScore");
+            donkeyScore = document.querySelector("#donkeyScore");
+            lines = Array.from(document.getElementsByClassName("line"));
+
+
+
+        }
+
+        window.onkeydown = (e) => {
+
+            carControl(e);
+
+        }
+
+        //game loop
+        setInterval(() => {
+
+            donkeyX += 50;
+            donkey.style.top = donkeyX + 'px';
+            donkeyTop = parseInt(donkey.style.top, 10);
+            carTop = parseInt(car.style.top, 10);
+            donkeyBottom = parseInt(donkey.style.top + 51);
+
+
+            //player win
+            if (carTop == 10) {
+                window.alert("You Win");
+                location.reload();
+            }
+
+            //donkey win
+            if (parseInt(donkeyScore.innerHTML) >= 5) {
+                window.alert("Donkey Win");
+                donkeyScore.innerHTML = "0";
+                location.reload();
+            }
+
+
+
+            //collision detection
+            if (donkey.style.left == car.style.left && donkeyBottom >= carTop) {
+                //donkey score increment  
+                donkeyScore.innerHTML = parseInt(donkeyScore.innerHTML) + 1;
+               
+
+                donkeySpawn();
+            }
+
+
+            //player proceeded without hitting donkey
+            if (donkeyTop - 40 > carTop) {
+                carY -= 20;
+                donkeySpawn();
+                driverScore.innerHTML = parseInt(driverScore.innerHTML) + 1;
+                car.style.top = carY + 'px';
+            }
+
+        }, 300);
+
+        //lines translation
+        setInterval(() => {
+
+            lines.map((line, i) => {
+
+                if (parseInt(line.style.top) > 420) {
+                    line.style.top = "-460px";
+
+                }
+                line.style.top = ((parseInt(line.style.top) + 10)) + "px";
+
+            });
+
+        }, 50);
+
+
+        //donkey spawn function
+        var donkeySpawn = () => {
+
+            var rnd = Math.floor(Math.random() * 2);
+
+            if (rnd == 0) {
+                donkeyX = 0;
+                donkey.style.top = "-10px";
+                donkey.style.left = DONKEY_LEFT;
+
+
+            }
+            else {
+                donkeyX = 0;
+                donkey.style.top = "-10px";
+                donkey.style.left = DONKEY_RIGTH;
+
+            }
+
+        }
+
+        //car control function
+        var carControl = (e) => {
+
+            if (e.keyCode == 32) {
+                if (car.style.left == CAR_LEFT)
+                    car.style.left = CAR_RIGTH;
+                else
+                    car.style.left = CAR_LEFT;
+
+            }
+
+        }
+
+
+    </script>
+
+</body>
+
+</html>
